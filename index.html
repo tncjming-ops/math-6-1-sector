@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國小六年級數學 6-1 扇形的弧長與周長 - 互動教學簡報</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Google Fonts: Noto Sans TC & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- 載入 Font Awesome 圖示 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Noto Sans TC', 'Inter', sans-serif;
+      background-color: #0f172a; /* 深藍灰背景襯托 16:9 投影畫布 */
+      color: #1e293b;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* 16:9 簡報舞台容器 */
+    .slide-stage {
+      aspect-ratio: 16 / 9;
+      max-height: calc(100vh - 84px);
+      max-width: 100%;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    /* 統一色彩編碼 (Color Coding) */
+    .color-arc { color: #e11d48; }       /* 紅色：弧長 */
+    .bg-arc { background-color: #e11d48; }
+    .border-arc { border-color: #e11d48; }
+
+    .color-radius { color: #2563eb; }    /* 藍色：半徑/直徑 */
+    .bg-radius { background-color: #2563eb; }
+    .border-radius { border-color: #2563eb; }
+
+    .color-angle { color: #059669; }     /* 綠色：圓心角比例 */
+    .bg-angle { background-color: #059669; }
+    .border-angle { border-color: #059669; }
+
+    /* SVG 動畫過渡設定 */
+    .svg-smooth {
+      transition: all 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 濾紙關門閃爍動畫 */
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.6)); }
+      50% { filter: drop-shadow(0 0 12px rgba(37, 99, 235, 1)); }
+    }
+    .door-active {
+      animation: pulseGlow 1.5s infinite;
+    }
+
+    /* 隱藏捲軸但保留功能 */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 分數垂直排版 */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 0.2em;
+      line-height: 1.05;
+    }
+    .frac > span:first-child {
+      border-bottom: 2.5px solid currentColor;
+      padding: 0 0.25em 2px 0.25em;
+    }
+    .frac > span:last-child {
+      padding: 2px 0.25em 0 0.25em;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col justify-between">
+
+  <!-- 主工作區：左側簡報舞台 + 右側可收合講者備忘錄 -->
+  <main class="flex-1 flex items-center justify-center p-3 md:p-5 overflow-hidden relative">
+    
+    <!-- 16:9 簡報主畫面 -->
+    <div id="slideStage" class="slide-stage w-full rounded-2xl border-4 border-slate-200 relative overflow-hidden flex flex-col justify-between p-6 md:p-10">
+      
+      <!-- 頂部狀態列（頁碼、階段標籤、顏色圖例） -->
+      <header class="flex items-center justify-between border-b-2 border-slate-100 pb-3 shrink-0">
+        <div class="flex items-center gap-3">
+          <span id="stageBadge" class="px-3.5 py-1 rounded-full text-sm md:text-base font-bold bg-indigo-100 text-indigo-800 tracking-wide">
+            引起動機
+          </span>
+          <span id="textbookRef" class="text-slate-400 font-semibold text-sm md:text-base">
+            課本 P.82
+          </span>
+        </div>
+
+        <!-- 視覺色彩編碼提示 -->
+        <div class="hidden sm:flex items-center gap-4 text-xs md:text-sm font-bold bg-slate-50 px-4 py-1.5 rounded-full border border-slate-200">
+          <span class="flex items-center gap-1.5 text-rose-600">
+            <span class="w-3 h-3 rounded-full bg-rose-600 inline-block"></span> 弧長（彎線）
+          </span>
+          <span class="flex items-center gap-1.5 text-blue-600">
+            <span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span> 半徑／直徑（直線）
+          </span>
+          <span class="flex items-center gap-1.5 text-emerald-600">
+            <span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span> 圓心角比例
+          </span>
+        </div>
+
+        <div class="text-slate-500 font-extrabold text-base md:text-lg">
+          <span id="currentPageNum" class="text-indigo-600">1</span> / 12
+        </div>
+      </header>
+
+      <!-- 動態投影片內容注入區 -->
+      <section id="slideContent" class="flex-1 flex flex-col justify-center overflow-y-auto no-scrollbar py-3">
+        <!-- 由 JavaScript 渲染各頁內容 -->
+      </section>
+
+      <!-- 底部頁尾資訊 -->
+      <footer class="flex items-center justify-between text-xs md:text-sm text-slate-400 pt-2 border-t border-slate-100 shrink-0">
+        <span>國小六年級上學期數學｜第六單元 扇形的周長和面積（活動 6-1）</span>
+        <span>按鍵盤 ← → 鍵切換投影片</span>
+      </footer>
+    </div>
+
+    <!-- 右側可收合「教師講者備忘錄」抽屜 -->
+    <aside id="speakerDrawer" class="hidden w-80 lg:w-96 h-full max-h-[calc(100vh-84px)] ml-4 bg-slate-800 text-slate-100 rounded-2xl p-5 flex-col justify-between shadow-2xl border border-slate-700 shrink-0">
+      <div>
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
+          <h3 class="font-bold text-amber-400 flex items-center gap-2 text-lg">
+            <i class="fa-solid fa-chalkboard-user"></i> 教師講者備忘錄
+          </h3>
+          <button onclick="toggleSpeakerNotes()" class="text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <div id="speakerNoteText" class="text-base leading-relaxed text-slate-200 space-y-3 overflow-y-auto max-h-[60vh]">
+          <!-- 動態講稿內容 -->
+        </div>
+      </div>
+      <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 text-xs text-slate-300">
+        <p class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-lightbulb"></i> 公開授課觀課重點提示：</p>
+        <p id="teachingTipText">引導學生觀察視覺色彩編碼，建立「弧長」與「周長」的結構差異。</p>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- 底部教師控制台（導覽列 + 互動工具列） -->
+  <nav class="h-16 bg-slate-900 border-t border-slate-800 px-4 md:px-8 flex items-center justify-between text-white shrink-0">
+    <!-- 左側：頁面選擇與前後翻頁 -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <button onclick="prevSlide()" id="btnPrev" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-chevron-left"></i> <span class="hidden sm:inline">上一頁</span>
+      </button>
+      
+      <select id="slideSelector" onchange="goToSlide(parseInt(this.value))" class="bg-slate-800 border border-slate-700 text-white text-sm md:text-base font-bold rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 max-w-[180px] md:max-w-xs">
+        <!-- 動態生成 12 頁選單 -->
+      </select>
+
+      <button onclick="nextSlide()" id="btnNext" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 font-bold flex items-center gap-1.5 transition">
+        <span class="hidden sm:inline">下一頁</span> <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- 中間：內建課堂倒數計時器 -->
+    <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+      <i class="fa-regular fa-clock text-amber-400"></i>
+      <span id="timerDisplay" class="font-mono font-extrabold text-lg md:text-xl text-amber-300 w-16 text-center">03:00</span>
+      <button onclick="setTimer(180)" class="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 font-bold" title="設定 3 分鐘">3分</button>
+      <button onclick="setTimer(240)" class="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 font-bold" title="設定 4 分鐘">4分</button>
+      <button onclick="toggleTimer()" id="btnTimerToggle" class="text-xs px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 font-bold">
+        開始
+      </button>
+      <button onclick="resetTimer()" class="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600" title="重設計時器">
+        <i class="fa-solid fa-rotate-left"></i>
+      </button>
+    </div>
+
+    <!-- 右側：講稿切換與全螢幕投影 -->
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSpeakerNotes()" id="btnNotes" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-sm flex items-center gap-2 transition">
+        <i class="fa-solid fa-comment-dots text-amber-400"></i>
+        <span class="hidden md:inline">講者備忘錄</span>
+      </button>
+      <button onclick="toggleFullscreen()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-sm flex items-center gap-2 transition" title="全螢幕投影">
+        <i class="fa-solid fa-expand text-sky-400"></i>
+        <span class="hidden md:inline">全螢幕</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 課堂提示訊息框（取代 alert） -->
+  <div id="toastBox" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl border border-slate-700 font-bold text-base z-50 hidden transition-opacity duration-300">
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. 12 頁教學簡報完整資料與互動邏輯
+    // ==========================================
+    let currentSlide = 0;
+
+    // 互動狀態變數
+    let quizRevealed = [false, false, false];
+    let filterDoorClosed = false;
+    let filterQuarterDoorClosed = false;
+    let ex2Simplified = false;
+    let ex3Step = 0;
+    let starAssembled = false;
+
+    const slidesData = [
+      // P.1 封面頁
+      {
+        stage: "課程啟動",
+        ref: "單元首頁 P.82",
+        title: "封面頁：6-1 扇形的周長和面積",
+        speaker: "「各位同學好，今天我們要從世界知名的洛杉磯道奇棒球場出發，一起破解『扇形』的弧長與周長秘密！請大家翻開課本第 82 頁，並準備好學習單與紅、藍兩色筆。」",
+        tip: "確認學生桌上已備妥直徑 10 公分圓形濾紙教具與紅藍雙色筆。",
+        render: () => `
+          <div class="h-full flex flex-col md:flex-row items-center justify-between gap-8 px-4">
+            <div class="flex-1 space-y-5">
+              <div class="inline-block px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 font-extrabold text-base md:text-lg">
+                國小六年級上學期｜數學領域公開授課
+              </div>
+              <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-tight">
+                第六單元<br>
+                <span class="text-indigo-600">扇形的周長和面積</span>
+              </h1>
+              <p class="text-xl md:text-2xl font-bold text-slate-600">
+                活動 6-1：扇形的弧長與周長（第 1 節）
+              </p>
+              <div class="pt-4 flex flex-wrap gap-4 text-base md:text-lg font-bold text-slate-500">
+                <span class="bg-slate-100 px-4 py-2 rounded-xl"><i class="fa-solid fa-book-open text-indigo-500 mr-2"></i>教材：課本 P.82～85</span>
+                <span class="bg-slate-100 px-4 py-2 rounded-xl"><i class="fa-solid fa-user-tie text-indigo-500 mr-2"></i>教學者：莊志明 教師</span>
+              </div>
+            </div>
+            <!-- 幾何視覺裝飾：扇形動態意象 SVG -->
+            <div class="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center bg-indigo-50/70 rounded-3xl p-4 border-2 border-indigo-100">
+              <svg viewBox="0 0 240 240" class="w-full h-full">
+                <!-- 虛線完整圓 -->
+                <circle cx="120" cy="120" r="95" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6 6"/>
+                <!-- 扇形填色 -->
+                <path d="M 120 120 L 215 120 A 95 95 0 0 0 72.5 37.7 Z" fill="#fef2f2"/>
+                <!-- 圓心角標記 -->
+                <path d="M 148 120 A 28 28 0 0 0 106 95.8" fill="none" stroke="#059669" stroke-width="4"/>
+                <!-- 兩條半徑（藍色） -->
+                <line x1="120" y1="120" x2="215" y2="120" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                <line x1="120" y1="120" x2="72.5" y2="37.7" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                <!-- 圓弧（紅色） -->
+                <path d="M 215 120 A 95 95 0 0 0 72.5 37.7" fill="none" stroke="#e11d48" stroke-width="8" stroke-linecap="round"/>
+                <!-- 圓心 -->
+                <circle cx="120" cy="120" r="6" fill="#0f172a"/>
+                <text x="155" y="75" fill="#e11d48" font-weight="900" font-size="18">弧長</text>
+                <text x="152" y="142" fill="#2563eb" font-weight="900" font-size="16">半徑</text>
+                <text x="128" y="102" fill="#059669" font-weight="900" font-size="15">圓心角</text>
+              </svg>
+            </div>
+          </div>
+        `
+      },
+
+      // P.2 學習目標導引頁
+      {
+        stage: "目標導引",
+        ref: "學習地圖",
+        title: "今天的三大闖關任務地圖",
+        speaker: "「這節課我們有三個闖關任務！只要掌握『紅線代表弧長』跟『藍線代表半徑』的關係，今天所有的扇形周長問題都能輕鬆過關。」",
+        tip: "向學生說明本節課學習路徑：先區辨弧與周長 → 再用圓心角找比例 → 最後小組合作解複合圖形。",
+        render: () => `
+          <div class="h-full flex flex-col justify-center space-y-6 px-2">
+            <h2 class="text-3xl md:text-4xl font-black text-slate-800 text-center">
+              今天我們要完成哪三個數學任務？
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- 任務 1 -->
+              <div class="bg-rose-50 border-2 border-rose-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                <div>
+                  <div class="w-12 h-12 rounded-2xl bg-rose-600 text-white font-black text-2xl flex items-center justify-center mb-4">1</div>
+                  <h3 class="text-2xl font-black text-rose-900 mb-2">濾紙大變身</h3>
+                  <p class="text-lg text-slate-700 font-medium leading-relaxed">
+                    分清楚彎彎的<span class="text-rose-600 font-black">「弧長」</span>與圍成一圈的<span class="text-blue-600 font-black">「周長」</span>有什麼不同。
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-rose-200 text-sm font-bold text-rose-700">
+                  對應課本 P.84｜動手摺一摺
+                </div>
+              </div>
+
+              <!-- 任務 2 -->
+              <div class="bg-emerald-50 border-2 border-emerald-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                <div>
+                  <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-2xl flex items-center justify-center mb-4">2</div>
+                  <h3 class="text-2xl font-black text-emerald-900 mb-2">圓心角密碼</h3>
+                  <p class="text-lg text-slate-700 font-medium leading-relaxed">
+                    利用<span class="text-emerald-600 font-black">「圓心角 ÷ 360°」</span>找出扇形是幾分之幾圓，並學會先約分再算！
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-emerald-200 text-sm font-bold text-emerald-700">
+                  對應課本 P.85｜例 2、例 3
+                </div>
+              </div>
+
+              <!-- 任務 3 -->
+              <div class="bg-blue-50 border-2 border-blue-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+                <div>
+                  <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white font-black text-2xl flex items-center justify-center mb-4">3</div>
+                  <h3 class="text-2xl font-black text-blue-900 mb-2">動動腦偵探</h3>
+                  <p class="text-lg text-slate-700 font-medium leading-relaxed">
+                    小組合作追蹤邊界，把分散的圓弧拼起來，破解複合圖形的周長！
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-blue-200 text-sm font-bold text-blue-700">
+                  對應課本 P.85｜小組白板挑戰
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.3 引起動機（P.82）
+      {
+        stage: "引起動機",
+        ref: "課本 P.82",
+        title: "從數學看世界：棒球場像什麼圖形？",
+        speaker: "「請看螢幕上的美國道奇體育場俯瞰圖，棒球場的內野加上外野看起來像什麼圖形？（扇形！）誰能說說看，扇形是由哪些線段圍成的？」",
+        tip: "喚起五年級先備經驗：扇形由「兩條一樣長的半徑」和「一段圓弧」圍成。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-2">
+            <!-- 左側：棒球場情境圖解 -->
+            <div class="bg-emerald-900 rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-center justify-center h-full max-h-[360px] shadow-inner">
+              <svg viewBox="0 0 300 260" class="w-full h-full max-h-[260px]">
+                <!-- 草地扇形外野 -->
+                <path d="M 150 230 L 35 115 A 162 162 0 0 1 265 115 Z" fill="#16a34a" stroke="#ffffff" stroke-width="3"/>
+                <!-- 紅土內野扇形 -->
+                <path d="M 150 230 L 95 175 A 78 78 0 0 1 205 175 Z" fill="#d97706" stroke="#ffffff" stroke-width="2"/>
+                <!-- 內野草皮菱形 -->
+                <polygon points="150,215 118,183 150,151 182,183" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+                <!-- 數學幾何強調疊加層 -->
+                <path d="M 35 115 A 162 162 0 0 1 265 115" fill="none" stroke="#fb7185" stroke-width="8" stroke-linecap="round"/>
+                <line x1="150" y1="230" x2="35" y2="115" stroke="#60a5fa" stroke-width="6" stroke-linecap="round"/>
+                <line x1="150" y1="230" x2="265" y2="115" stroke="#60a5fa" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="150" cy="230" r="7" fill="#facc15"/>
+                <text x="135" y="250" fill="#facc15" font-weight="900" font-size="15">圓心(本壘)</text>
+                <text x="125" y="55" fill="#fecdd3" font-weight="900" font-size="18">外野全壘打牆(弧)</text>
+              </svg>
+              <span class="text-xs text-emerald-200 mt-1">洛杉磯道奇體育場幾何結構示意圖</span>
+            </div>
+
+            <!-- 右側：核心構成要素複習 -->
+            <div class="space-y-5">
+              <h2 class="text-3xl md:text-4xl font-black text-slate-800">
+                複習一下：<span class="text-indigo-600">什麼是扇形？</span>
+              </h2>
+              <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 space-y-4">
+                <p class="text-xl md:text-2xl font-bold text-slate-700 leading-relaxed">
+                  扇形是圓的一部分，由<span class="text-blue-600 underline decoration-4">兩條一樣長的半徑</span>和<span class="text-rose-600 underline decoration-4">一段弧</span>所圍成的圖形。
+                </p>
+                <div class="grid grid-cols-3 gap-3 pt-2 text-center">
+                  <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <div class="text-amber-500 font-black text-xl">● 圓心</div>
+                    <div class="text-sm text-slate-500 font-bold mt-1">兩半徑交點</div>
+                  </div>
+                  <div class="bg-white p-3 rounded-xl border border-blue-200">
+                    <div class="text-blue-600 font-black text-xl">／ 2 條半徑</div>
+                    <div class="text-sm text-slate-500 font-bold mt-1">長度完全相等</div>
+                  </div>
+                  <div class="bg-white p-3 rounded-xl border border-rose-200">
+                    <div class="text-rose-600 font-black text-xl">⌒ 1 段弧</div>
+                    <div class="text-sm text-slate-500 font-bold mt-1">圓周的一部分</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.4 迷思快問快答（P.83）
+      {
+        stage: "先備診斷",
+        ref: "課本 P.83 練習",
+        title: "O / X 手勢快問快答大考驗",
+        speaker: "「請全班舉起雙手！聽到題目請比出 O 或 X。特別注意第 2 題『半圓不是扇形』，請比手勢！……為什麼比 X？沒錯，半圓也有圓心、兩條半徑成一直線，還有一段弧，它是 1/2 圓的扇形！」",
+        tip: "形成性評量重點：觀察全班手勢，若超過 3 人對第 2 題猶豫，立即點擊揭示按鈕展示 180° 扇形結構。",
+        render: () => {
+          const questions = [
+            { q: "① 扇形的兩條半徑一樣長。", ans: "O", desc: "正確！同一個圓的半徑都一樣長。", color: "emerald" },
+            { q: "② 半圓不是扇形。", ans: "X", desc: "錯誤！半圓圓心角 180°，也是兩條半徑＋弧，是 1/2 圓的扇形！", color: "rose" },
+            { q: "③ 扇形是由圓的兩條半徑和弧所圍成的圖形。", ans: "O", desc: "正確！這就是扇形的定義。", color: "emerald" }
+          ];
+          return `
+            <div class="h-full flex flex-col justify-center space-y-5 px-2">
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl md:text-3xl font-black text-slate-800">
+                  <i class="fa-solid fa-hands-clapping text-amber-500 mr-2"></i>全班請比手勢：敘述正確比 <span class="text-emerald-600">O</span>，錯誤比 <span class="text-rose-600">X</span>
+                </h2>
+                <button onclick="revealAllQuiz()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm md:text-base shadow">
+                  全部揭曉答案
+                </button>
+              </div>
+
+              <div class="space-y-4">
+                ${questions.map((item, idx) => `
+                  <div onclick="toggleQuiz(${idx})" class="cursor-pointer bg-white border-2 ${quizRevealed[idx] ? (item.ans === 'O' ? 'border-emerald-400 bg-emerald-50/40' : 'border-rose-400 bg-rose-50/40') : 'border-slate-200 hover:border-indigo-300'} rounded-2xl p-4 md:p-5 flex items-center justify-between transition shadow-sm">
+                    <div class="space-y-1">
+                      <div class="text-xl md:text-2xl font-bold text-slate-800">${item.q}</div>
+                      ${quizRevealed[idx] ? `<div class="text-base md:text-lg font-bold text-${item.color}-700 mt-1"><i class="fa-solid fa-circle-info mr-1"></i>${item.desc}</div>` : `<div class="text-sm text-slate-400 font-semibold">點擊卡片揭曉答案</div>`}
+                    </div>
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-4xl shrink-0 ${quizRevealed[idx] ? (item.ans === 'O' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white') : 'bg-slate-100 text-slate-400'}">
+                      ${quizRevealed[idx] ? item.ans : '?'}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      },
+
+      // P.5 發展活動一（P.84 濾紙大變身）
+      {
+        stage: "發展活動一",
+        ref: "課本 P.84 例 1",
+        title: "濾紙大變身：分清楚「弧長」與「周長」",
+        speaker: "「請拿出直徑 10 公分的圓形濾紙對摺成 1/2 張。用紅筆描出外圍的弧，用藍筆描出底部的直線。算周長時，只算紅線 15.7 公分夠嗎？點擊『幫扇形關門』看看！」",
+        tip: "動作表徵關鍵：透過「關門動畫」讓學生深刻記住周長必須加上兩條半徑（直徑）。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-12 gap-6 items-center px-2">
+            <!-- 左側互動動畫區 -->
+            <div class="md:col-span-5 bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 flex flex-col items-center justify-between h-full max-h-[380px]">
+              <div class="text-base font-extrabold text-slate-600">直徑 10 cm 圓形濾紙（對摺成 1/2 張）</div>
+              
+              <svg viewBox="0 0 260 180" class="w-full max-h-[210px]">
+                <!-- 下半部虛線圓 -->
+                <path d="M 30 110 A 100 100 0 0 0 230 110" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6 6"/>
+                <!-- 1/2 扇形填色 -->
+                <path d="M 30 110 A 100 100 0 0 1 230 110 Z" fill="#fff1f2"/>
+                <!-- 紅色弧長（上半圓弧） -->
+                <path d="M 30 110 A 100 100 0 0 1 230 110" fill="none" stroke="#e11d48" stroke-width="8" stroke-linecap="round"/>
+                
+                <!-- 藍色直徑（兩條半徑）：依狀態切換顯示 -->
+                <line x1="30" y1="110" x2="230" y2="110"
+                  stroke="${filterDoorClosed ? '#2563eb' : '#94a3b8'}"
+                  stroke-width="${filterDoorClosed ? '8' : '3'}"
+                  stroke-dasharray="${filterDoorClosed ? '0' : '6 6'}"
+                  stroke-linecap="round"
+                  class="svg-smooth ${filterDoorClosed ? 'door-active' : ''}"/>
+                
+                <!-- 圓心點 -->
+                <circle cx="130" cy="110" r="5" fill="#0f172a"/>
+                <text x="105" y="38" fill="#e11d48" font-weight="900" font-size="16">弧長 15.7 cm</text>
+                <text x="82" y="138" fill="${filterDoorClosed ? '#2563eb' : '#64748b'}" font-weight="900" font-size="16">
+                  ${filterDoorClosed ? '直徑 10 cm（已關門！）' : '直徑 10 cm（未加上）'}
+                </text>
+              </svg>
+
+              <button onclick="toggleFilterDoor()" class="w-full py-3 rounded-2xl font-black text-lg text-white shadow-lg transition ${filterDoorClosed ? 'bg-slate-600 hover:bg-slate-700' : 'bg-blue-600 hover:bg-blue-700 animate-bounce'}">
+                <i class="fa-solid ${filterDoorClosed ? 'fa-door-open' : 'fa-door-closed'} mr-2"></i>
+                ${filterDoorClosed ? '重設為只看弧長' : '點擊幫扇形「關門」（加上直徑）'}
+              </button>
+            </div>
+
+            <!-- 右側分步算式對照 -->
+            <div class="md:col-span-7 space-y-4">
+              <!-- ① 弧長 -->
+              <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 md:p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="px-3 py-1 rounded-lg bg-rose-600 text-white font-black text-base">① 1/2 張濾紙的「弧長」</span>
+                  <span class="text-rose-700 font-bold text-sm">圓周長的一半</span>
+                </div>
+                <div class="text-2xl md:text-3xl font-black text-slate-800 font-mono">
+                  10 × 3.14 ÷ 2 ＝ <span class="text-rose-600">15.7</span>（公分）
+                </div>
+              </div>
+
+              <!-- ② 周長 -->
+              <div class="border-2 rounded-2xl p-4 md:p-5 transition-all ${filterDoorClosed ? 'bg-blue-50 border-blue-400 shadow-md' : 'bg-slate-50 border-slate-200 opacity-70'}">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="px-3 py-1 rounded-lg bg-blue-600 text-white font-black text-base">② 1/2 張濾紙的「周長」</span>
+                  <span class="text-blue-700 font-bold text-sm">弧長 ＋ 2 條半徑（直徑）</span>
+                </div>
+                <div class="text-2xl md:text-3xl font-black text-slate-800 font-mono">
+                  <span class="text-rose-600">15.7</span> ＋ <span class="text-blue-600">10</span> ＝ <span class="text-indigo-700 underline decoration-4">25.7</span>（公分）
+                </div>
+                <p class="text-base font-bold text-blue-800 mt-2">
+                  <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i>
+                  重點提醒：周長是圖形外圍一圈的總長度，千萬別忘記加上直線！
+                </p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.6 類推演練（P.84 1/4 張濾紙與試試看）
+      {
+        stage: "發展活動一",
+        ref: "課本 P.84 練習",
+        title: "類推演練：1/4 張濾紙與「試試看」",
+        speaker: "「現在請大家再對摺一次變成 1/4 張濾紙，半徑是幾公分？（5 公分！）有幾條半徑？（2 條！）請完成學習單任務一第 4 題，並挑戰課本 P.84 試試看。」",
+        tip: "巡視檢核：注意學生在計算 1/4 圓周長時，是否誤將半徑 5 公分只加一次（漏掉另一條半徑）。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch px-2">
+            <!-- 左側：1/4 張濾紙 -->
+            <div class="bg-white border-2 border-slate-200 rounded-3xl p-5 flex flex-col justify-between">
+              <div>
+                <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-extrabold text-sm">例 1-3｜再對摺一次</span>
+                <h3 class="text-2xl font-black text-slate-800 mt-2">1/4 張濾紙的周長大約是幾公分？</h3>
+              </div>
+
+              <div class="flex items-center justify-center my-2">
+                <svg viewBox="0 0 200 160" class="w-48 h-36">
+                  <circle cx="110" cy="120" r="85" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-dasharray="5 5"/>
+                  <path d="M 110 120 L 25 120 A 85 85 0 0 1 110 35 Z" fill="#fef2f2"/>
+                  <!-- 紅弧 -->
+                  <path d="M 25 120 A 85 85 0 0 1 110 35" fill="none" stroke="#e11d48" stroke-width="7" stroke-linecap="round"/>
+                  <!-- 兩條藍半徑 -->
+                  <line x1="110" y1="120" x2="25" y2="120" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                  <line x1="110" y1="120" x2="110" y2="35" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                  <text x="50" y="142" fill="#2563eb" font-weight="900" font-size="14">5 cm</text>
+                  <text x="118" y="82" fill="#2563eb" font-weight="900" font-size="14">5 cm</text>
+                </svg>
+              </div>
+
+              <div class="bg-slate-50 rounded-2xl p-4 space-y-2 border border-slate-200">
+                <div class="text-base font-bold text-slate-600">直徑 10 cm，半徑 ＝ 10 ÷ 2 ＝ 5 cm</div>
+                <button onclick="toggleQuarterDoor()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base">
+                  ${filterQuarterDoorClosed ? '隱藏解答' : '點擊核對算式與答案'}
+                </button>
+                ${filterQuarterDoorClosed ? `
+                  <div class="pt-2 text-lg md:text-xl font-black text-slate-800 font-mono">
+                    <span class="text-rose-600">10 × 3.14 ÷ 4</span> ＋ <span class="text-blue-600">5 × 2</span><br>
+                    ＝ 7.85 ＋ 10 ＝ <span class="text-indigo-700">17.85</span>（公分）
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- 右側：課本 P.84 試試看 -->
+            <div class="bg-amber-50/60 border-2 border-amber-200 rounded-3xl p-5 flex flex-col justify-between">
+              <div>
+                <span class="px-3 py-1 rounded-full bg-amber-200 text-amber-900 font-extrabold text-sm">課本 P.84 試試看</span>
+                <h3 class="text-2xl font-black text-slate-800 mt-2">
+                  直徑 30 公分的圓形壓克力板平分成 6 份，其中一份的扇形周長大約是幾公分？
+                </h3>
+              </div>
+
+              <div class="flex items-center justify-center my-2">
+                <svg viewBox="0 0 200 160" class="w-48 h-36">
+                  <circle cx="100" cy="80" r="68" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 5"/>
+                  <!-- 1/6 扇形 -->
+                  <path d="M 100 80 L 100 12 A 68 68 0 0 1 158.9 46 Z" fill="#e0f2fe"/>
+                  <path d="M 100 12 A 68 68 0 0 1 158.9 46" fill="none" stroke="#e11d48" stroke-width="7" stroke-linecap="round"/>
+                  <line x1="100" y1="80" x2="100" y2="12" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+                  <line x1="100" y1="80" x2="158.9" y2="46" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+                  <text x="15" y="85" fill="#475569" font-weight="900" font-size="14">直徑 30cm</text>
+                </svg>
+              </div>
+
+              <div class="bg-white rounded-2xl p-4 border border-amber-200 space-y-1">
+                <div class="text-sm font-bold text-amber-800">思考提示：平分成 6 份，弧長是圓周長的 <span class="frac"><span>1</span><span>6</span></span>，兩條半徑合起來剛好是 1 條直徑（30 cm）！</div>
+                <div class="text-lg md:text-xl font-black text-slate-800 font-mono pt-1">
+                  <span class="text-rose-600">30 × 3.14 × <span class="frac"><span>1</span><span>6</span></span></span> ＋ <span class="text-blue-600">30</span> ＝ <span class="text-indigo-700">45.7</span>（公分）
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.7 發展活動二（P.85 例 2）
+      {
+        stage: "發展活動二",
+        ref: "課本 P.85 例 2",
+        title: "圓心角密碼：找出「幾分之幾圓」",
+        speaker: "「當題目只給圓心角 45°，沒說幾分之幾圓時怎麼辦？別忘了周角是 360°！比較左右兩個算式，為什麼右邊『先約分』這麼好算？因為 8 和分母 8 直接約掉變 1 了！」",
+        tip: "呼應課本 P.85 親師建議：強調「先約分、再乘 3.14」，降低小數計算錯誤率。",
+        render: () => `
+          <div class="h-full flex flex-col justify-center space-y-5 px-2">
+            <!-- 題目敘述與圖示 -->
+            <div class="flex flex-col md:flex-row items-center justify-between bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 gap-4">
+              <div class="space-y-1">
+                <span class="px-3 py-0.5 rounded bg-emerald-600 text-white font-bold text-sm">課本 P.85 例 2（只求弧長）</span>
+                <h3 class="text-2xl md:text-3xl font-black text-slate-800">
+                  半徑 <span class="text-blue-600">4 公尺</span>、圓心角 <span class="text-emerald-600">45°</span> 的扇形，弧長大約是幾公尺？
+                </h3>
+              </div>
+              <div class="bg-white px-5 py-3 rounded-2xl border-2 border-emerald-300 text-center shrink-0">
+                <div class="text-sm font-bold text-slate-500">圓心角占周角的比例</div>
+                <div class="text-2xl font-black text-emerald-700">
+                  45° ÷ 360° ＝ <span class="frac"><span>45</span><span>360</span></span> ＝ <span class="frac text-3xl text-rose-600"><span>1</span><span>8</span></span> 圓
+                </div>
+              </div>
+            </div>
+
+            <!-- 左右算式策略 PK 區 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- 左邊：未先約分 -->
+              <div class="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="font-black text-lg text-slate-600"><i class="fa-solid fa-turtle mr-2"></i>方法 A：直接乘開再除</span>
+                  <span class="text-xs px-2.5 py-1 rounded bg-slate-200 text-slate-700 font-bold">數字較大易算錯</span>
+                </div>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-700 bg-white p-4 rounded-2xl border border-slate-200">
+                  4 × 2 × 3.14 × <span class="frac"><span>45</span><span>360</span></span><br>
+                  ＝ 25.12 × 45 ÷ 360<br>
+                  ＝ 1130.4 ÷ 360 ＝ 3.14（公尺）
+                </div>
+              </div>
+
+              <!-- 右邊：先約分（推薦） -->
+              <div class="bg-amber-50 border-2 border-amber-400 rounded-3xl p-5 space-y-3 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="font-black text-lg text-amber-900"><i class="fa-solid fa-bolt text-amber-500 mr-2"></i>方法 B：先約分再計算（超推薦！）</span>
+                  <button onclick="toggleEx2Simplify()" class="text-xs px-3 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold">
+                    ${ex2Simplified ? '顯示原式' : '點我看約分魔法'}
+                  </button>
+                </div>
+                <div class="text-xl md:text-2xl font-black font-mono text-slate-800 bg-white p-4 rounded-2xl border border-amber-300">
+                  <span class="text-blue-600">4 × 2</span> × 3.14 × <span class="frac text-emerald-600"><span>1</span><span>8</span></span><br>
+                  ${ex2Simplified
+                    ? `＝ <span class="line-through text-slate-400">8</span> × 3.14 × <span class="frac"><span>1</span><span class="line-through text-slate-400">8</span></span> ＝ <span class="text-rose-600 text-3xl">3.14</span>（公尺）`
+                    : `＝ 8 × 3.14 × <span class="frac"><span>1</span><span>8</span></span> ＝ <span class="text-rose-600">3.14</span>（公尺）`
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.8 獨立演練（P.85 例 3）
+      {
+        stage: "發展活動二",
+        ref: "課本 P.85 例 3",
+        title: "三步驟破解扇形周長（獨立演練）",
+        speaker: "「這題給的是『半徑 12 公尺』、圓心角 120°，而且題目問的是『周長』喔！請大家在學習單任務二第 2 題依序完成三步驟，等一下我們一步一步對答案。」",
+        tip: "確認學生是否將半徑 12 公尺乘以 2 轉為直徑 24 公尺，以及最後是否加上 2 條半徑（24 公尺）。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-12 gap-6 items-center px-2">
+            <!-- 左側圖形 -->
+            <div class="md:col-span-4 bg-slate-50 border-2 border-slate-200 rounded-3xl p-4 flex flex-col items-center justify-center">
+              <svg viewBox="0 0 220 200" class="w-full max-h-[200px]">
+                <!-- 120度扇形 -->
+                <path d="M 110 140 L 195 140 A 85 85 0 0 0 67.5 66.4 Z" fill="#f3e8ff"/>
+                <!-- 圓心角 120° -->
+                <path d="M 135 140 A 25 25 0 0 0 97.5 118.3" fill="none" stroke="#059669" stroke-width="3.5"/>
+                <!-- 紅弧 -->
+                <path d="M 195 140 A 85 85 0 0 0 67.5 66.4" fill="none" stroke="#e11d48" stroke-width="8" stroke-linecap="round"/>
+                <!-- 兩條藍半徑 -->
+                <line x1="110" y1="140" x2="195" y2="140" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                <line x1="110" y1="140" x2="67.5" y2="66.4" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="110" cy="140" r="5" fill="#0f172a"/>
+                <text x="108" y="108" fill="#059669" font-weight="900" font-size="16">120°</text>
+                <text x="135" y="162" fill="#2563eb" font-weight="900" font-size="16">12 m</text>
+                <text x="52" y="112" fill="#2563eb" font-weight="900" font-size="16">12 m</text>
+              </svg>
+              <div class="text-center font-black text-lg text-slate-700 mt-2">
+                半徑 12 m、圓心角 120°<br>求<span class="text-indigo-600">扇形周長</span>
+              </div>
+            </div>
+
+            <!-- 右側三步驟鷹架揭曉 -->
+            <div class="md:col-span-8 space-y-3">
+              <div class="flex justify-end">
+                <button onclick="nextEx3Step()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm md:text-base shadow">
+                  <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+                  ${ex3Step < 3 ? `揭曉第 ${ex3Step + 1} 步驟` : '重新隱藏步驟'}
+                </button>
+              </div>
+
+              <!-- 步驟 1 -->
+              <div class="p-4 rounded-2xl border-2 ${ex3Step >= 1 ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200'}">
+                <div class="font-black text-emerald-800 text-lg">步驟 ① 一找比例（圓心角 ÷ 360°）</div>
+                <div class="text-xl md:text-2xl font-black font-mono mt-1 ${ex3Step >= 1 ? 'text-slate-800' : 'text-slate-300'}">
+                  ${ex3Step >= 1 ? '120° ÷ 360° ＝ <span class="frac"><span>120</span><span>360</span></span> ＝ <span class="frac text-emerald-600"><span>1</span><span>3</span></span> 圓' : '（請先在學習單寫出約分後的分數）'}
+                </div>
+              </div>
+
+              <!-- 步驟 2 -->
+              <div class="p-4 rounded-2xl border-2 ${ex3Step >= 2 ? 'bg-rose-50 border-rose-300' : 'bg-slate-50 border-slate-200'}">
+                <div class="font-black text-rose-800 text-lg">步驟 ② 二算弧長（直徑 × 3.14 × 比例）</div>
+                <div class="text-xl md:text-2xl font-black font-mono mt-1 ${ex3Step >= 2 ? 'text-slate-800' : 'text-slate-300'}">
+                  ${ex3Step >= 2 ? '<span class="text-blue-600">12 × 2</span> × 3.14 × <span class="frac text-emerald-600"><span>1</span><span>3</span></span> ＝ 8 × 3.14 ＝ <span class="text-rose-600">25.12</span>（公尺）' : '（注意：半徑 12 公尺要先乘以 2 變直徑！）'}
+                </div>
+              </div>
+
+              <!-- 步驟 3 -->
+              <div class="p-4 rounded-2xl border-2 ${ex3Step >= 3 ? 'bg-blue-50 border-blue-400 shadow' : 'bg-slate-50 border-slate-200'}">
+                <div class="font-black text-blue-800 text-lg">步驟 ③ 三加兩半徑（幫扇形關門！）</div>
+                <div class="text-xl md:text-2xl font-black font-mono mt-1 ${ex3Step >= 3 ? 'text-slate-800' : 'text-slate-300'}">
+                  ${ex3Step >= 3 ? '<span class="text-rose-600">25.12</span> ＋ <span class="text-blue-600">12 × 2</span> ＝ <span class="text-indigo-700 underline decoration-4">49.12</span>（公尺）' : '（算出弧長後，還要加上兩條半徑喔！）'}
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.9 發展活動三（P.85 動動腦 - 小組任務）
+      {
+        stage: "發展活動三",
+        ref: "課本 P.85 動動腦",
+        title: "小組合作偵探：星形塗色圖形的周長",
+        speaker: "「現在進入小組白板挑戰！請觀察課本 P.85 動動腦的藍色星形圖形，用螢光筆沿著藍色邊界走一圈。討論看看：外面的虛線正方形邊長要算進去嗎？計時 4 分鐘開始！」",
+        tip: "請開啟底部計時器 4 分鐘，巡視各組討論是否能排除外圍虛線干擾。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-2">
+            <!-- 左側：課本動動腦圖形 -->
+            <div class="bg-white border-2 border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center">
+              <svg viewBox="0 0 240 240" class="w-60 h-60">
+                <!-- 外圍虛線正方形 -->
+                <rect x="30" y="30" width="180" height="180" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 6"/>
+                <!-- 直角記號 -->
+                <polyline points="30,45 45,45 45,30" fill="none" stroke="#64748b" stroke-width="2"/>
+                <polyline points="195,30 195,45 210,45" fill="none" stroke="#64748b" stroke-width="2"/>
+                <polyline points="30,195 45,195 45,210" fill="none" stroke="#64748b" stroke-width="2"/>
+                <polyline points="195,210 195,195 210,195" fill="none" stroke="#64748b" stroke-width="2"/>
+                <!-- 中間星形塗色區域（4 段半徑 90 的 1/4 圓弧） -->
+                <path d="M 120 30 A 90 90 0 0 0 210 120 A 90 90 0 0 0 120 210 A 90 90 0 0 0 30 120 A 90 90 0 0 0 120 30 Z"
+                      fill="#bae6fd" stroke="#e11d48" stroke-width="5"/>
+                <!-- 標註數字 4 -->
+                <text x="70" y="22" fill="#0f172a" font-weight="900" font-size="16">4</text>
+                <text x="160" y="22" fill="#0f172a" font-weight="900" font-size="16">4</text>
+                <text x="216" y="80" fill="#0f172a" font-weight="900" font-size="16">4</text>
+                <text x="216" y="170" fill="#0f172a" font-weight="900" font-size="16">4</text>
+                <text x="125" y="234" fill="#64748b" font-weight="700" font-size="13">（單位：公分）</text>
+              </svg>
+            </div>
+
+            <!-- 右側：小組討論任務卡 -->
+            <div class="space-y-4">
+              <div class="inline-block px-4 py-1 rounded-full bg-blue-600 text-white font-black text-base">
+                <i class="fa-solid fa-users mr-2"></i>小組白板合作任務（4 分鐘）
+              </div>
+              <h3 class="text-2xl md:text-3xl font-black text-slate-800 leading-snug">
+                任務問題：塗色部分的周長大約是幾公分？
+              </h3>
+              <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 space-y-3 text-lg font-bold text-slate-700">
+                <p>🔍 <span class="text-rose-600 font-black">線索 1：</span>用手指沿著藍色塗色邊界走一圈，外圍的「虛線」算不算在內？</p>
+                <p>🧩 <span class="text-blue-600 font-black">線索 2：</span>藍色圖形的邊界，是由幾段相同的圓弧組成的？</p>
+                <p>🎯 <span class="text-emerald-600 font-black">線索 3：</span>把這些圓弧拼在一起，會變成什麼圖形？</p>
+              </div>
+              <button onclick="setTimer(240); toggleTimer();" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg shadow">
+                <i class="fa-solid fa-play mr-2"></i>啟動 4 分鐘小組討論計時
+              </button>
+            </div>
+          </div>
+        `
+      },
+
+      // P.10 動動腦揭密動畫
+      {
+        stage: "發展活動三",
+        ref: "動態心象拼補",
+        title: "動動腦揭密秀：4 個 1/4 圓弧大合體！",
+        speaker: "「請看大螢幕的幾何魔法！點擊『啟動圓弧合體動畫』，看看這 4 段紅色 1/4 圓弧從四個角落飛出來拼在一起，剛好變成 1 個半徑 4 公分的完整圓周！」",
+        tip: "這是本節公開授課最大視覺亮點！透過動態旋轉拼補建立空間心象，為下一節 6-2 複合圖形面積鋪路。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-12 gap-6 items-center px-2">
+            <!-- 左側動態 SVG 舞台 -->
+            <div class="md:col-span-6 bg-slate-900 rounded-3xl p-4 flex flex-col items-center justify-between h-full max-h-[380px] text-white">
+              <div class="text-sm font-bold text-amber-300">
+                ${starAssembled ? '✨ 合體完成：剛好 1 個半徑 4cm 的完整圓周！' : '觀察 4 段紅色 1/4 圓弧的位置'}
+              </div>
+
+              <svg viewBox="0 0 260 260" class="w-60 h-60 overflow-visible">
+                <!-- 背景虛線正方形（合體時淡化） -->
+                <rect x="40" y="40" width="180" height="180" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 6"
+                      style="opacity: ${starAssembled ? 0.25 : 1}; transition: opacity 0.8s;"/>
+                
+                <!-- 4 段 1/4 圓弧（每段半徑 90，透過 CSS transform 移動至中心點 (130,130) 拼成整圓） -->
+                <!-- 左上角弧 (圓心在 40,40，從 130,40 順時針到 40,130) -> 移到圓心 (130,130) 需 translate(90, 90) -->
+                <path d="M 130 40 A 90 90 0 0 1 40 130" fill="none" stroke="#fb7185" stroke-width="8" stroke-linecap="round"
+                      class="svg-smooth"
+                      style="transform: ${starAssembled ? 'translate(90px, 90px)' : 'translate(0px, 0px)'};"/>
+                
+                <!-- 右上角弧 (圓心在 220,40，從 220,130 順時針到 130,40) -> 移到圓心 (130,130) 需 translate(-90, 90) -->
+                <path d="M 220 130 A 90 90 0 0 1 130 40" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"
+                      class="svg-smooth"
+                      style="transform: ${starAssembled ? 'translate(-90px, 90px)' : 'translate(0px, 0px)'};"/>
+                
+                <!-- 右下角弧 (圓心在 220,220，從 130,220 順時針到 220,130) -> 移到圓心 (130,130) 需 translate(-90, -90) -->
+                <path d="M 130 220 A 90 90 0 0 1 220 130" fill="none" stroke="#34d399" stroke-width="8" stroke-linecap="round"
+                      class="svg-smooth"
+                      style="transform: ${starAssembled ? 'translate(-90px, -90px)' : 'translate(0px, 0px)'};"/>
+                
+                <!-- 左下角弧 (圓心在 40,220，從 40,130 順時針到 130,220) -> 移到圓心 (130,130) 需 translate(90, -90) -->
+                <path d="M 40 130 A 90 90 0 0 1 130 220" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"
+                      class="svg-smooth"
+                      style="transform: ${starAssembled ? 'translate(90px, -90px)' : 'translate(0px, 0px)'};"/>
+
+                <!-- 合體後顯示半徑標示 -->
+                <g style="opacity: ${starAssembled ? 1 : 0}; transition: opacity 0.8s;">
+                  <circle cx="130" cy="130" r="5" fill="#ffffff"/>
+                  <line x1="130" y1="130" x2="220" y2="130" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 4"/>
+                  <text x="152" y="122" fill="#ffffff" font-weight="900" font-size="16">半徑 4 cm</text>
+                </g>
+              </svg>
+
+              <button onclick="toggleStarAssemble()" class="w-full py-3 rounded-2xl font-black text-lg text-slate-900 shadow-lg transition ${starAssembled ? 'bg-amber-300 hover:bg-amber-400' : 'bg-rose-500 hover:bg-rose-600 text-white'}">
+                <i class="fa-solid ${starAssembled ? 'fa-rotate-left' : 'fa-wand-magic-sparkles'} mr-2"></i>
+                ${starAssembled ? '還原回星形圖案' : '啟動 4 段圓弧「合體動畫」'}
+              </button>
+            </div>
+
+            <!-- 右側解題總結 -->
+            <div class="md:col-span-6 space-y-4">
+              <h3 class="text-2xl md:text-3xl font-black text-slate-800">
+                動動腦解題關鍵：<span class="text-rose-600">化零為整</span>
+              </h3>
+              <ul class="space-y-3 text-lg md:text-xl font-bold text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                <li>1️⃣ 塗色邊界只有 <span class="text-rose-600 font-black">4 段</span> 半徑 4 公分的 <span class="frac"><span>1</span><span>4</span></span> 圓弧（不含虛線）。</li>
+                <li>2️⃣ 4 個 <span class="frac"><span>1</span><span>4</span></span> 圓弧合起來 ＝ <span class="text-indigo-600 font-black">1 個完整圓周長</span>！</li>
+              </ul>
+              <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-5">
+                <div class="text-sm font-bold text-indigo-700 mb-1">最簡潔的算式：</div>
+                <div class="text-2xl md:text-3xl font-black font-mono text-slate-900">
+                  4 × 2 × 3.14 ＝ <span class="text-rose-600 underline decoration-4">25.12</span>（公分）
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.11 綜合活動：概念統整
+      {
+        stage: "綜合活動",
+        ref: "核心概念統整",
+        title: "扇形周長通關三步驟口訣",
+        speaker: "「全班一起大聲念一次今天的通關口訣：一找比例、二算弧長、三加兩半徑！算周長的時候，千萬別忘記幫扇形『關門』喔！」",
+        tip: "透過朗朗上口的三步驟口訣，鞏固本節課所有學習目標。",
+        render: () => `
+          <div class="h-full flex flex-col justify-center space-y-6 px-2">
+            <h2 class="text-3xl md:text-4xl font-black text-center text-slate-800">
+              計算扇形周長，<span class="text-indigo-600">只要記住這三步！</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- 第一步 -->
+              <div class="bg-emerald-50 border-2 border-emerald-300 rounded-3xl p-6 text-center space-y-3 shadow-sm">
+                <div class="inline-block px-4 py-1 rounded-full bg-emerald-600 text-white font-black text-lg">第一步</div>
+                <h3 class="text-3xl font-black text-emerald-900">一找比例</h3>
+                <p class="text-lg font-bold text-slate-700">
+                  <span class="frac"><span>圓心角</span><span>360°</span></span> ＝ 幾分之幾圓
+                </p>
+                <div class="bg-white py-2 px-3 rounded-xl text-emerald-700 font-black text-base border border-emerald-200">
+                  ★ 秘訣：先約分更好算！
+                </div>
+              </div>
+
+              <!-- 第二步 -->
+              <div class="bg-rose-50 border-2 border-rose-300 rounded-3xl p-6 text-center space-y-3 shadow-sm">
+                <div class="inline-block px-4 py-1 rounded-full bg-rose-600 text-white font-black text-lg">第二步</div>
+                <h3 class="text-3xl font-black text-rose-900">二算弧長</h3>
+                <p class="text-lg font-bold text-slate-700">
+                  直徑 × 3.14 × 幾分之幾圓
+                </p>
+                <div class="bg-white py-2 px-3 rounded-xl text-rose-700 font-black text-base border border-rose-200">
+                  ★ 陷阱：給半徑要先 × 2！
+                </div>
+              </div>
+
+              <!-- 第三步 -->
+              <div class="bg-blue-50 border-2 border-blue-300 rounded-3xl p-6 text-center space-y-3 shadow-sm">
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-600 text-white font-black text-lg">第三步</div>
+                <h3 class="text-3xl font-black text-blue-900">三加兩半徑</h3>
+                <p class="text-lg font-bold text-slate-700">
+                  扇形弧長 ＋ 半徑 × 2
+                </p>
+                <div class="bg-white py-2 px-3 rounded-xl text-blue-700 font-black text-base border border-blue-200">
+                  ★ 口訣：算周長別忘記關門！
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // P.12 出口票檢核與下節預告
+      {
+        stage: "形成性評量",
+        ref: "課堂出口票",
+        title: "下課前 3 分鐘：出口票自我挑戰",
+        speaker: "「請大家用最後 3 分鐘，安靜獨立完成學習單最下方的『任務四：出口票』，寫完請在自我檢核表打勾，下課交給老師。下一節課我們要來挑戰『扇形的面積』！」",
+        tip: "啟動 3 分鐘計時器，收集出口票作為下節課差異化教學分組依據。",
+        render: () => `
+          <div class="h-full grid grid-cols-1 md:grid-cols-12 gap-6 items-center px-2">
+            <!-- 左側：出口票題目提示 -->
+            <div class="md:col-span-8 bg-white border-2 border-indigo-200 rounded-3xl p-6 space-y-4 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="px-4 py-1 rounded-full bg-indigo-600 text-white font-black text-base">
+                  <i class="fa-solid fa-ticket mr-2"></i>Exit Ticket 出口票（獨立完成）
+                </span>
+                <span class="text-sm font-bold text-slate-500">圓周率以 3.14 計算</span>
+              </div>
+
+              <div class="space-y-4 text-lg md:text-xl font-bold text-slate-800">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span class="text-rose-600 font-black">1.【觀念辨析】</span>一個圓心角 <span class="text-emerald-600">90°</span>、半徑 <span class="text-blue-600">10 公分</span>的扇形，它的「弧長」大約是（　　）公分，「周長」大約是（　　）公分。
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span class="text-blue-600 font-black">2.【比例轉換】</span>一個圓心角 <span class="text-emerald-600">60°</span>、直徑 <span class="text-blue-600">12 公分</span>的扇形，這個扇形是（　）分之（　）圓，它的周長大約是（　　）公分。
+                </div>
+                <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-base text-amber-900">
+                  <span class="font-black">3.【自我檢核】</span>記得在學習單勾選你今天最需要注意的步驟喔！
+                </div>
+              </div>
+            </div>
+
+            <!-- 右側：計時啟動與下節預告 -->
+            <div class="md:col-span-4 flex flex-col justify-between h-full max-h-[360px] space-y-4">
+              <div class="bg-slate-900 text-white rounded-3xl p-6 text-center space-y-3 flex-1 flex flex-col justify-center">
+                <div class="text-amber-400 font-bold text-base">出口票挑戰倒數</div>
+                <div id="slideTimerMirror" class="text-5xl font-mono font-black text-white">03:00</div>
+                <button onclick="setTimer(180); toggleTimer();" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-lg">
+                  <i class="fa-solid fa-stopwatch mr-2"></i>開始 3 分鐘計時
+                </button>
+              </div>
+
+              <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-4">
+                <div class="text-xs font-black text-indigo-600 uppercase">Next Lesson｜下節預告</div>
+                <div class="text-lg font-black text-slate-800 mt-1">
+                  課本 P.86～87：扇形的面積計算
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // ==========================================
+    // 2. 互動功能控制函式
+    // ==========================================
+    function toggleQuiz(idx) {
+      quizRevealed[idx] = !quizRevealed[idx];
+      renderSlide();
+    }
+
+    function revealAllQuiz() {
+      quizRevealed = [true, true, true];
+      renderSlide();
+    }
+
+    function toggleFilterDoor() {
+      filterDoorClosed = !filterDoorClosed;
+      renderSlide();
+    }
+
+    function toggleQuarterDoor() {
+      filterQuarterDoorClosed = !filterQuarterDoorClosed;
+      renderSlide();
+    }
+
+    function toggleEx2Simplify() {
+      ex2Simplified = !ex2Simplified;
+      renderSlide();
+    }
+
+    function nextEx3Step() {
+      ex3Step = ex3Step < 3 ? ex3Step + 1 : 0;
+      renderSlide();
+    }
+
+    function toggleStarAssemble() {
+      starAssembled = !starAssembled;
+      renderSlide();
+    }
+
+    // ==========================================
+    // 3. 簡報導覽與渲染引擎
+    // ==========================================
+    function initSelector() {
+      const selector = document.getElementById('slideSelector');
+      selector.innerHTML = slidesData.map((s, idx) =>
+        `<option value="${idx}">P.${idx + 1} ${s.title}</option>`
+      ).join('');
+    }
+
+    function renderSlide() {
+      const data = slidesData[currentSlide];
+      document.getElementById('stageBadge').textContent = data.stage;
+      document.getElementById('textbookRef').textContent = data.ref;
+      document.getElementById('currentPageNum').textContent = currentSlide + 1;
+      document.getElementById('slideContent').innerHTML = data.render();
+      document.getElementById('speakerNoteText').innerHTML = `<p>${data.speaker}</p>`;
+      document.getElementById('teachingTipText').textContent = data.tip;
+
+      // 同步下拉選單與按鈕狀態
+      document.getElementById('slideSelector').value = currentSlide;
+      document.getElementById('btnPrev').disabled = currentSlide === 0;
+      document.getElementById('btnNext').disabled = currentSlide === slidesData.length - 1;
+
+      // 同步鏡像計時器顯示
+      updateTimerUI();
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slidesData.length) {
+        currentSlide = index;
+        renderSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slidesData.length - 1) {
+        currentSlide++;
+        renderSlide();
+      }
+    }
+
+    // 鍵盤左右鍵切換投影片
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // 切換講者備忘錄抽屜
+    function toggleSpeakerNotes() {
+      const drawer = document.getElementById('speakerDrawer');
+      drawer.classList.toggle('hidden');
+      drawer.classList.toggle('flex');
+    }
+
+    // 切換全螢幕投影
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {
+          showToast("您的瀏覽器限制全螢幕操作，請直接按 F11 進入全螢幕！");
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+
+    // ==========================================
+    // 4. 內建課堂倒數計時器
+    // ==========================================
+    let timerSeconds = 180;
+    let timerDefault = 180;
+    let timerInterval = null;
+
+    function formatTime(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimerUI() {
+      const formatted = formatTime(timerSeconds);
+      const display = document.getElementById('timerDisplay');
+      if (display) display.textContent = formatted;
+      const mirror = document.getElementById('slideTimerMirror');
+      if (mirror) mirror.textContent = formatted;
+    }
+
+    function setTimer(sec) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerDefault = sec;
+      timerSeconds = sec;
+      document.getElementById('btnTimerToggle').textContent = '開始';
+      document.getElementById('btnTimerToggle').classList.replace('bg-amber-600', 'bg-emerald-600');
+      updateTimerUI();
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('btnTimerToggle');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = '繼續';
+        btn.classList.replace('bg-amber-600', 'bg-emerald-600');
+      } else {
+        if (timerSeconds <= 0) timerSeconds = timerDefault;
+        btn.textContent = '暫停';
+        btn.classList.replace('bg-emerald-600', 'bg-amber-600');
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = '開始';
+            btn.classList.replace('bg-amber-600', 'bg-emerald-600');
+            showToast("⏰ 時間到！請小組停止討論，準備上台分享！");
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      setTimer(timerDefault);
+    }
+
+    // 初始化啟動
+    window.onload = function () {
+      initSelector();
+      renderSlide();
+    };
+  </script>
+</body>
+</html>
